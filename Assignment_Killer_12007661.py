@@ -1,26 +1,25 @@
 # Tetris - DYOA Advanced at TU Graz WS 2020
-# Name:       YOUR_NAME
-# Student ID: YOUR_STUDENT_ID
+# Name: Killer Lorenz
+# Student ID: 12007661
 
 import pygame, sys, time, random
 from pygame.locals import *
 from framework import BaseGame
 
-# Recommended Start: init function of Block Class
 class Block:
     blocknames = ['clevelandZ', 'rhodeIslandZ', 'blueRicky', 'smashBoy', 'orangeRicky', 'teewee', 'hero']
     def __init__(self, game, block_name):
-        self.name = None  # TODO set name / Can be 'hero', 'teewee', ...
-        self.rotation = 0  # TODO randomize rotation (e.g. 0, 1, 2, 3; Hint: different number of rotations per block)
+        self.name = block_name
+        self.rotation = random.randint(0, len(game.block_list[block_name]) - 1)
         self.set_shape(game.block_list[self.name][self.rotation])
         self.x = int(game.board_width / 2) - int(self.width / 2)
         self.y = 0
-        self.color = None  # TODO Set Color correctly / Can be 'red', 'green', ... (see self.blockColors)
+        self.color = game.block_colors[block_name]
 
     def set_shape(self, shape):
         self.shape = shape
-        self.width = 0  # TODO Calculate the correct width
-        self.height = 0  # TODO Calculate the correct height
+        self.width = len(shape[0])
+        self.height = len(shape)
 
     def right_rotation(self, rotation_options):
         # TODO rotate block once clockwise
@@ -53,6 +52,21 @@ class Game(BaseGame):
         while True:
             self.test_quit_game()
             # TODO Game Logic: implement key events & move blocks (Hint: check if move is valid/block is on the Board)
+
+            key = self.check_key_press()
+            
+            if (key == K_RIGHT):
+                current_block.x += 1
+            elif (key == K_LEFT):
+                current_block.x -= 1
+            elif (key == K_DOWN):
+                pass
+            elif (key == K_q):
+                pass
+            elif (key == K_e):
+                pass
+            elif (key == K_p):
+                pass
 
             # Draw after game logic
             self.display.fill(self.background)
@@ -91,7 +105,6 @@ class Game(BaseGame):
     # Create a new random block
     # Returns the newly created Block Class
     def get_new_block(self):
-        # TODO make block choice random! (Use random.choice out of the list of blocks) see blocknames array
         blockname = random.choice(Block.blocknames)
         block = Block(self, blockname)
         return block
