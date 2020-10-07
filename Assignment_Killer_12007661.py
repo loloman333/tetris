@@ -12,6 +12,13 @@ class Block:
         self.name = block_name
         self.rotation = random.randint(0, len(game.block_list[block_name]) - 1)
         self.set_shape(game.block_list[self.name][self.rotation])
+        self.rotations_list = game.block_list[self.name]
+        if block_name == "hero":
+            if self.rotation == 0:
+                self.rotation_counter = 0
+            else:
+                self.rotation_counter = 1
+
         self.x = int(game.board_width / 2) - int(self.width / 2)
         self.y = 0
         self.color = game.block_colors[block_name]
@@ -21,13 +28,100 @@ class Block:
         self.width = len(shape[0])
         self.height = len(shape)
 
+    def move_right(self):
+        self.move(1, 0)
+
+    def move_left(self):
+        self.move(-1, 0)
+
+    def move(self, x_diff, y_diff):
+        new_x = self.x + x_diff
+        if new_x < 0 or new_x + (self.width - 1) > 9:
+            return False
+
+        new_y = self.y + y_diff
+        if new_y < 0 or new_y + (self.height - 1) > 17:
+            return False
+
+        self.x = new_x
+        self.y = new_y
+
     def right_rotation(self, rotation_options):
-        # TODO rotate block once clockwise
-        pass
+        self.rotate(1)
+
+        # Adjust positon after rotation for 3x3 blocks
+        if max(self.width, self.height) == 3:
+            if self.rotation == 0:
+                pass
+            elif self.rotation == 1:
+                self.move(1, 0)
+            elif self.rotation == 2:
+                self.move(-1, 1)
+            elif self.rotation == 3:
+                self.move(0, -1)
+
+        # Adjust positon after rotation for hero block
+        elif self.name == 'hero':
+
+            print(self.rotation_counter)
+
+            if self.rotation_counter == 0:
+                self.move(2, -1)
+            elif self.rotation_counter == 1:
+                self.move(-2, 2)                
+            elif self.rotation_counter == 2:
+                self.move(1, -2)
+            elif self.rotation_counter == 3:
+                self.move(-1, 1)
+            
+            self.rotation_counter += 1
+            if self.rotation_counter == 4:
+                self.rotation_counter = 0
 
     def left_rotation(self, rotation_options):
-        # TODO rotate block once counter-clockwise
-        pass
+        self.rotate(-1)
+
+        # Adjust positon after rotation for 3x3 blocks
+        if max(self.width, self.height) == 3:
+            if self.rotation == 0:
+                self.move(-1, 0)
+            elif self.rotation == 1:
+                self.move(1, -1)
+            elif self.rotation == 2:
+                self.move(0, 1)
+            elif self.rotation == 3:
+                pass
+
+        # Adjust positon after rotation for hero block
+        elif self.name == 'hero':
+
+            print(self.rotation_counter)
+
+            if self.rotation_counter == 0:
+                self.move(1, -1)
+            elif self.rotation_counter == 1:
+                self.move(-2, 1)
+            elif self.rotation_counter == 2:
+                self.move(2, -2)
+            elif self.rotation_counter == 3:
+                self.move(-1, 2)
+
+            self.rotation_counter -= 1
+            if self.rotation_counter == -1:
+                self.rotation_counter = 3
+
+    
+    def rotate(self, direction):
+
+        if self.rotation + direction == len(self.rotations_list):
+            self.rotation = 0
+        elif self.rotation + direction == -1:
+            self.rotation = len(self.rotations_list) - 1
+        else:
+            self.rotation += direction
+        
+        self.set_shape(self.rotations_list[self.rotation])
+            
 
 class Game(BaseGame):
     def run_game(self):
@@ -51,22 +145,28 @@ class Game(BaseGame):
         # GameLoop
         while True:
             self.test_quit_game()
-            # TODO Game Logic: implement key events & move blocks (Hint: check if move is valid/block is on the Board)
 
-            key = self.check_key_press()
+            key = None
+            for event in pygame.event.get([KEYDOWN]):
+                key = event.key
             
             if (key == K_RIGHT):
-                current_block.x += 1
+                current_block.move_right()
             elif (key == K_LEFT):
-                current_block.x -= 1
+                current_block.move_left()
             elif (key == K_DOWN):
-                pass
-            elif (key == K_q):
-                pass
-            elif (key == K_e):
-                pass
+                current_block.move(0,1)
+            elif (key == K_UP):
+                current_block.move(0,-1)
+
             elif (key == K_p):
-                pass
+                current_block = next_block
+                next_block = self.get_new_block()
+
+            elif (key == K_q):
+                current_block.left_rotation(None)
+            elif (key == K_e):
+                current_block.right_rotation(None)
 
             # Draw after game logic
             self.display.fill(self.background)
@@ -87,7 +187,9 @@ class Game(BaseGame):
     # Parameters block, x_change (any movement done in X direction), yChange (movement in Y direction)
     # Returns True if no part of the block is outside the Board or collides with another Block
     def is_block_on_valid_position(self, block, x_change=0, y_change=0):
-        # TODO check if block is on valid position after change in x or y direction
+
+        
+
         return False
 
     # Check if the line on y Coordinate is complete
